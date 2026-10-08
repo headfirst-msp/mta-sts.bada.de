@@ -1,0 +1,5 @@
+version: STSv1
+mode: testing
+mx: bada-de.r-v1.mx.microsoft
+mx: *.mail.protection.outlook.com
+max_age: 1209600
