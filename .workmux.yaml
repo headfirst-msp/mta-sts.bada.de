@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/raine/workmux/main/schema.json
+#
+# One task, one worktree, one tmux session. `workmux add <branch>` creates the worktree beside the
+# repository (`<repo>__worktrees/<branch>`), runs post_create and starts the agent.
+
+# Named rather than `auto`, so a worktree created from a feature branch still branches from main.
+base_branch: main
+
+# The default `window` mode needs a running tmux session; a dispatch script has none.
+mode: session
+
+# Agent profiles live in ~/.config/workmux/config.yaml: model and credentials belong to the machine.
+agent: coder-qwen
+
+# One pane: an agent needs about 68 columns and a split leaves both halves below that.
+panes:
+  - command: <agent>
+    name: agent
+    focus: true
+
+files:
+  # Gitignored per-checkout state, copied (not linked). A pattern with no match is skipped.
+  copy:
+    - .env
+    - .claude/settings.local.json
+    - .pi/settings.local.json
+  # Only gitignored leaf directories may be linked (`git ls-files <path>` empty).
+  symlink: []
+
+# Enters the dev shell once before the agent starts: it generates `.mcp.json`, `.pi/settings.json`,
+# `.claude/`, the skill links and the git hooks. Non-interactive, because an interactive shell would hang.
+post_create:
+  - nix develop -c true
+
+# Stray `result` links are GC roots that would outlive the worktree.
+pre_remove:
+  - rm -f result result-*
