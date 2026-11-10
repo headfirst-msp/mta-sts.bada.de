@@ -1,5 +1,5 @@
 {
-  description = "Dev environment of the project: the shared headfirst-msp/nix-base modules plus the project's own additions";
+  description = "MTA-STS policy site of bada.de: dev shell from headfirst-msp/nix-base and a check of the policy file";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -17,7 +17,17 @@
       perSystem =
         { pkgs, ... }:
         {
-          headfirst.devShell.packages = [ pkgs.git ];
+          headfirst.devShell.packages = [
+            pkgs.git
+            pkgs.python3
+          ];
+
+          checks.mta-sts-policy =
+            pkgs.runCommand "mta-sts-policy" { nativeBuildInputs = [ pkgs.python3 ]; }
+              ''
+                python3 -I ${./scripts/check-mta-sts-policy.py} ${./. + "/.well-known/mta-sts.txt"}
+                touch $out
+              '';
 
           pre-commit.settings.hooks.markdownlint.excludes = [
             # Third-party skills keep their upstream formatting so updates stay diffable (see .agents/skills/THIRD_PARTY.md).
