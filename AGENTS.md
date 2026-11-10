@@ -6,15 +6,24 @@ Map of this repository for AI coding agents. Keep this file short. Details live 
 
 - Name: `headfirst-msp-mta-sts.bada.de`
 - Purpose: MTA-STS policy hosting for bada.de via GitHub Pages
-- Stack: `language, framework and versions`
+- Stack: static files served by GitHub Pages (branch `main`, repository root, no Jekyll). Policy check in Python 3.13 from nixpkgs `nixos-26.05`. Dev shell: Nix flake with flake-parts and `headfirst-msp/nix-base`.
 
 ## Commands
 
 - Setup: `nix develop` (run first; it also generates `.mcp.json`, `.pi/settings.json` and `.claude/` and installs the git hooks; none of these are committed). One command in the shell: `nix develop -c <command>`.
 - Secrets are declared in `secretspec.toml`. Run a command that needs them as `secretspec run --reason "<why>" -- <command>`; SecretSpec asks for a reason in a session it detects as an agent and logs it. Never read a secret out of the environment into files, logs or replies. Setup per person: `docs/SECRETS.md`.
-- Test: `<command>`
+- Test: `nix flake check -L` (runs `checks.<system>.mta-sts-policy`, the RFC 8461 grammar check of `.well-known/mta-sts.txt`, with the hooks). Quick check: `python3 -I scripts/check-mta-sts-policy.py .well-known/mta-sts.txt`.
 - Lint: `nix develop -c prek run --all-files` (all git hooks on all files) and `nix fmt` (format). `nix flake check -L` runs both as checks.
-- Build: `<command>`
+- Build: none. GitHub Pages publishes the repository root of `main` as it is, a few minutes after the push.
+
+## This project
+
+- The repository is public and GitHub Pages serves every committed file under `https://mta-sts.bada.de/`. Commit nothing that must not be public.
+- `.well-known/mta-sts.txt` is the policy; `CNAME` sets the custom domain; `.nojekyll` keeps Jekyll from dropping `.well-known/`. Do not rename or remove any of them.
+- Every policy change needs a new `id` in the DNS TXT record `_mta-sts.bada.de`, or senders keep the cached policy. DNS is not in this repository: name the new `id` in the pull request for the operator.
+- Policy keys are lowercase and case-sensitive (`version`, `mode`, `mx`, `max_age`). Do not change them to Title Case.
+- An `mx` wildcard matches exactly one left-most label. Write the exact MX host from `dig +short MX bada.de`; a wrong pattern blocks mail once `mode` is `enforce`.
+- Rollout, DNS records and verification: `docs/ARCHITECTURE.md`.
 
 ## Where knowledge lives
 
