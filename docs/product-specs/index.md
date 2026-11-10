@@ -7,4 +7,4 @@ Implementation details belong in `ARCHITECTURE.md` or in design records.
 
 ## Specs
 
-- (none yet)
+- (none yet; the only behaviour, serving the policy, is described in `ARCHITECTURE.md`)
